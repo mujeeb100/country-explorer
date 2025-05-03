@@ -18,6 +18,12 @@ type Country = {
   borders?: string[];
 };
 
+interface CountryDetailProps {
+    params: {
+      id: string;
+    };
+  }
+
 async function getCountryByCode(code: string): Promise<Country> {
   const res = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
   if (!res.ok) throw new Error('Country not found');
@@ -32,11 +38,11 @@ async function getBorderCountries(codes: string[]): Promise<string[]> {
   return data.map((c: Country) => c.name.common);
 }
 
-export default async function CountryDetail({ params }: { params: { id: string } }) {
+export default async function CountryDetail({ params }: CountryDetailProps) {
     // const isAuthenticated = cookies().get('isAuthenticated')?.value; 
     const cookieStore = await cookies();
     const isAuthenticated = cookieStore.get('isAuthenticated')?.value;
-    
+
   // 🚫 Protect Route 
   if (!isAuthenticated) {
     redirect('/login');
