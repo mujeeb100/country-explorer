@@ -29,12 +29,14 @@ async function getBorderCountries(codes: string[]): Promise<string[]> {
   if (!codes?.length) return [];
   const res = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codes.join(',')}&fields=name`);
   const data = await res.json();
-  return data.map((c: any) => c.name.common);
+  return data.map((c: Country) => c.name.common);
 }
 
 export default async function CountryDetail({ params }: { params: { id: string } }) {
-    const isAuthenticated = cookies().get('isAuthenticated')?.value; 
-
+    // const isAuthenticated = cookies().get('isAuthenticated')?.value; 
+    const cookieStore = await cookies();
+    const isAuthenticated = cookieStore.get('isAuthenticated')?.value;
+    
   // 🚫 Protect Route 
   if (!isAuthenticated) {
     redirect('/login');
