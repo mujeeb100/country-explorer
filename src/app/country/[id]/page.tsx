@@ -10,7 +10,7 @@ type Country = {
   flags: { svg: string };
   population: number;
   region: string;
-  subregion: string;    
+  subregion: string;
   capital: string[];
   tld: string[];
   currencies?: { [key: string]: { name: string } };
@@ -18,11 +18,10 @@ type Country = {
   borders?: string[];
 };
 
-// interface CountryDetailProps {
-//     params: {
-//       id: string;
-//     };
-//   }
+type BorderCountry = {
+  name: string;
+  code: string;
+};
 
 async function getCountryByCode(code: string): Promise<Country> {
   const res = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
@@ -31,25 +30,26 @@ async function getCountryByCode(code: string): Promise<Country> {
   return data[0];
 }
 
-async function getBorderCountries(codes: string[]): Promise<string[]> {
+async function getBorderCountries(codes: string[]): Promise<BorderCountry[]> {
   if (!codes?.length) return [];
-  const res = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codes.join(',')}&fields=name`);
+  const res = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codes.join(',')}&fields=name,cca3`);
   const data = await res.json();
-  return data.map((c: Country) => c.name.common);
+  return data.map((c: any) => ({
+    name: c.name.common,
+    code: c.cca3
+  }));
 }
 
 export default async function CountryDetail({ params }: { params: { id: string } }) {
-    // const isAuthenticated = cookies().get('isAuthenticated')?.value; 
-    const cookieStore = await cookies();
-    const isAuthenticated = cookieStore.get('isAuthenticated')?.value;
+  const cookieStore = await cookies();
+  const isAuthenticated = cookieStore.get('isAuthenticated')?.value;
 
-  // 🚫 Protect Route 
   if (!isAuthenticated) {
     redirect('/login');
   }
 
   const country = await getCountryByCode(params.id);
-  const borderCountryNames = await getBorderCountries(country.borders || []);
+  const borderCountries = await getBorderCountries(country.borders || []);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -68,13 +68,13 @@ export default async function CountryDetail({ params }: { params: { id: string }
           <p><strong>Currency:</strong> {country.currencies ? Object.values(country.currencies).map(c => c.name).join(', ') : 'N/A'}</p>
           <p><strong>Languages:</strong> {country.languages ? Object.values(country.languages).join(', ') : 'N/A'}</p>
 
-          {borderCountryNames.length > 0 && (
+          {borderCountries.length > 0 && (
             <div className="mt-4">
               <strong>Border Countries:</strong>
               <div className="flex flex-wrap gap-2 mt-2">
-                {borderCountryNames.map((name, index) => (
-                  <Link key={index} href={`/country/${country.borders?.[index]}`}>
-                    <span className="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">{name}</span>
+                {borderCountries.map((border) => (
+                  <Link key={border.code} href={`/country/${border.code}`}>
+                    <span className="bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">{border.name}</span>
                   </Link>
                 ))}
               </div>
