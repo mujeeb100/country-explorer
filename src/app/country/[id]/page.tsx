@@ -29,33 +29,39 @@ type BorderCountryAPIResponse = {
     name: string;
     code: string;
   };
-async function getCountryByCode(code: string): Promise<Country> {
-  const res = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
-  if (!res.ok) throw new Error('Country not found');
-  const data = await res.json();
-  return data[0];
-}
-
-async function getBorderCountries(codes: string[]): Promise<BorderCountry[]> {
+  interface PageProps {
+    params: Readonly<{
+      id: string;
+    }>;
+  }
+  
+  async function getCountryByCode(code: string): Promise<Country> {
+    const res = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
+    if (!res.ok) throw new Error('Country not found');
+    const data = await res.json();
+    return data[0];
+  }
+  
+  async function getBorderCountries(codes: string[]): Promise<BorderCountry[]> {
     if (!codes?.length) return [];
     const res = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codes.join(',')}&fields=name,cca3`);
     const data: BorderCountryAPIResponse[] = await res.json();
     return data.map((c) => ({
       name: c.name.common,
-      code: c.cca3  
+      code: c.cca3
     }));
   }
-
-export default async function CountryDetail({ params }: { params: { id: string } }) {
-  const cookieStore = await cookies();
-  const isAuthenticated = cookieStore.get('isAuthenticated')?.value;
-
-  if (!isAuthenticated) {
-    redirect('/login');
-  }
-
-  const country = await getCountryByCode(params.id);
-  const borderCountries = await getBorderCountries(country.borders || []);
+  
+  export default async function CountryDetail({ params }: PageProps) {
+    const cookieStore = await cookies();
+    const isAuthenticated = cookieStore.get('isAuthenticated')?.value;
+  
+    if (!isAuthenticated) {
+      redirect('/login');
+    }
+  
+    const country = await getCountryByCode(params.id);
+    const borderCountries = await getBorderCountries(country.borders || []);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
