@@ -18,11 +18,11 @@ type Country = {
   borders?: string[];
 };
 
-interface CountryDetailProps {
-    params: {
-      id: string;
-    };
-  }
+// interface CountryDetailProps {
+//     params: {
+//       id: string;
+//     };
+//   }
 
 async function getCountryByCode(code: string): Promise<Country> {
   const res = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
@@ -38,7 +38,7 @@ async function getBorderCountries(codes: string[]): Promise<string[]> {
   return data.map((c: Country) => c.name.common);
 }
 
-export default async function CountryDetail({ params }: CountryDetailProps) {
+export default async function CountryDetail({ params }: { params: { id: string } }) {
     // const isAuthenticated = cookies().get('isAuthenticated')?.value; 
     const cookieStore = await cookies();
     const isAuthenticated = cookieStore.get('isAuthenticated')?.value;
