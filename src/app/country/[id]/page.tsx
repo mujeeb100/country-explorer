@@ -10,7 +10,7 @@ type Country = {
   flags: { svg: string };
   population: number;
   region: string;
-  subregion: string;
+  subregion: string;    
   capital: string[];
   tld: string[];
   currencies?: { [key: string]: { name: string } };
