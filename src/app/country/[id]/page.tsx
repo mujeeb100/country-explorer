@@ -18,11 +18,17 @@ type Country = {
   borders?: string[];
 };
 
-type BorderCountry = {
-  name: string;
-  code: string;
-};
+type BorderCountryAPIResponse = {
+    name: {
+      common: string;
+    };
+    cca3: string;
+  };
 
+  type BorderCountry = {
+    name: string;
+    code: string;
+  };
 async function getCountryByCode(code: string): Promise<Country> {
   const res = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
   if (!res.ok) throw new Error('Country not found');
@@ -31,14 +37,14 @@ async function getCountryByCode(code: string): Promise<Country> {
 }
 
 async function getBorderCountries(codes: string[]): Promise<BorderCountry[]> {
-  if (!codes?.length) return [];
-  const res = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codes.join(',')}&fields=name,cca3`);
-  const data = await res.json();
-  return data.map((c: any) => ({
-    name: c.name.common,
-    code: c.cca3
-  }));
-}
+    if (!codes?.length) return [];
+    const res = await fetch(`https://restcountries.com/v3.1/alpha?codes=${codes.join(',')}&fields=name,cca3`);
+    const data: BorderCountryAPIResponse[] = await res.json();
+    return data.map((c) => ({
+      name: c.name.common,
+      code: c.cca3  
+    }));
+  }
 
 export default async function CountryDetail({ params }: { params: { id: string } }) {
   const cookieStore = await cookies();
